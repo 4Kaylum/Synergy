@@ -17,26 +17,17 @@ function addNewCommand() {
     if(commandName == "") return;
     if(!commandName.match(/^[\d\w ]+$/)) return alert("That command name is invalid.");
     const newCommandTag = $(`
-        <div class="accordion w-100" id="guild-settings-accordion">
-            <form class="card interaction-form" data-interaction-name="${commandName}">
-                <div class="card-header" id="interaction-command-${commandName}">
-                    <h5 class="mb-0">
-                        <button class="btn btn-link w-100" type="button" data-toggle="collapse" data-target="#collapse-interaction-command-${commandName}" aria-expanded="true" aria-controls="collapse-interaction-command-${commandName}">
-                            ${commandName} command
-                        </button>
-                    </h5>
+        <form class="card interaction-form" data-interaction-name="${commandName}">
+            <div class="card-header" id="interaction-command-${commandName}">
+                ${commandName} command
+            </div>
+            <div class="card-body">
+                <div class="input-group">
+                    <button class="btn btn-primary w-50" type="button" onclick="addNewResponse(this.parentNode.parentNode);">Add new response</button>
+                    <button class="btn btn-secondary w-50" type="button" onclick="$(this.parentNode.parentNode.parentNode).remove();">Delete command</button>
                 </div>
-                <div id="collapse-interaction-command-${commandName}" class="collapse show" aria-labelledby="interaction-command-${commandName}" data-parent="#guild-settings-accordion">
-                    <div class="card-body">
-
-                        <div class="input-group">
-                            <button class="btn btn-primary w-50" type="button" onclick="addNewResponse(this.parentNode.parentNode);">Add new response</button>
-                            <button class="btn btn-secondary w-50" type="button" onclick="addNewResponse($(this.parentNode.parentNode.parentNode.parentNode.parentNode).remove());">Delete command</button>
-                        </div>
-                    </div>
-                </div>
-            </form>
-        </div>
+            </div>
+        </form>
     `);
     const accordionHolder = $('#guild-settings-accordion-holder');
     $(accordionHolder.children()[accordionHolder.children().length - 1]).before(newCommandTag);

@@ -25,36 +25,28 @@
             Add new command
         </button>
 
-        <div class="accordion w-100" id="guild-settings-accordion">
+        <div class="card-columns" id="guild-settings-accordion">
             {% for name, responses in interactions.items() %}
                 <form class="card interaction-form" data-interaction-name="{{ name }}">
 
                     <div class="card-header" id="interaction-command-{{ name }}">
-                        <h5 class="mb-0">
-                            <button class="btn btn-link w-100" type="button" data-toggle="collapse" data-target="#collapse-interaction-command-{{ name }}" aria-expanded="true" aria-controls="collapse-interaction-command-{{ name }}">
-                                {{ name }} command
-                            </button>
-                        </h5>
+                        {{ name }} command
                     </div> <!-- card-header -->
 
-                    <div id="collapse-interaction-command-{{ name }}" class="collapse show" aria-labelledby="interaction-command-{{ name }}" data-parent="#guild-settings-accordion">
-                        <div class="card-body">
-
-                            <div class="input-group">
-                                <button class="btn btn-primary w-50" type="button" onclick="addNewResponse(this.parentNode.parentNode);">Add new response</button>
-                                <button class="btn btn-secondary w-50" type="button" onclick="addNewResponse($(this.parentNode.parentNode.parentNode.parentNode.parentNode).remove());">Delete command</button>
-                            </div>
-
-                            {% for text in responses %}
-                                <div class="input-group mt-1">
-                                    <input type="text" class="form-control" placeholder="A response for an interaction" value="{{ text }}" required />
-                                    <div class="input-group-append">
-                                        <button class="btn btn-danger" type="button" onclick="$(this.parentNode.parentNode).remove()">-</button>
-                                    </div>
+                    <div class="card-body">
+                        <div class="input-group">
+                            <button class="btn btn-primary w-50" type="button" onclick="addNewResponse(this.parentNode.parentNode);">Add new response</button>
+                            <button class="btn btn-secondary w-50" type="button" onclick="$(this.parentNode.parentNode.parentNode).remove();">Delete command</button>
+                        </div>
+                        {% for text in responses %}
+                            <div class="input-group mt-1">
+                                <input type="text" class="form-control" placeholder="A response for an interaction" value="{{ text }}" required />
+                                <div class="input-group-append">
+                                    <button class="btn btn-danger" type="button" onclick="$(this.parentNode.parentNode).remove()">-</button>
                                 </div>
-                            {% endfor %}
-                        </div> <!-- card-body -->
-                    </div> <!-- collapse -->
+                            </div>
+                        {% endfor %}
+                    </div> <!-- card-body -->
 
                 </form> <!-- card -->
             {% endfor %}
