@@ -1,0 +1,45 @@
+{% extends "layout/base.j2" %}
+
+{% block content %}
+<div class="container mt-3">
+
+    <div class="row">
+        <div class="col">
+            <img class="text-center rounded mx-auto d-block" src="https://cdn.discordapp.com/icons/{{ guild.id }}/{{ guild.icon }}.png" alt="The guild icon for {{ guild.name }}" />
+        </div> <!-- col -->
+    </div> <!-- row -->
+
+    <div class="row">
+        <div class="col">
+            <h1 class="text-center">{{ guild.name }}</h1>
+        </div> <!-- col -->
+    </div> <!-- row -->
+
+    <div class="row">
+        <div class="accordion w-100" id="guild-settings-accordion">
+            {% for name, responses in interactions.items() %}
+                <div class="card">
+
+                    <div class="card-header" id="interaction-command-{{ name }}">
+                        <h5 class="mb-0">
+                            <button class="btn btn-link w-100" type="button" data-toggle="collapse" data-target="#collapse-interaction-command-{{ name }}" aria-expanded="false" aria-controls="collapse-interaction-command-{{ name }}">
+                                {{ name }} command
+                            </button>
+                        </h5>
+                    </div> <!-- card-header -->
+
+                    <div id="collapse-interaction-command-{{ name }}" class="collapse" aria-labelledby="interaction-command-{{ name }}" data-parent="#guild-settings-accordion">
+                        <div class="card-body">
+                            {% for text in responses %}
+                                <p>{{ text }}</p>
+                            {% endfor %}
+                        </div> <!-- card-body -->
+                    </div> <!-- collapse -->
+
+                </div> <!-- card -->
+            {% endfor %}
+        </div> <!-- accordion -->
+    </div> <!-- row -->
+
+<div>
+{% endblock content%}
