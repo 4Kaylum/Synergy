@@ -25,6 +25,15 @@ async def guild_login(request:Request):
     return HTTPFound(location=f'/guilds/{guild_id}')
 
 
+@routes.get('/logout')
+async def logout(request:Request):
+    """Clears your session cookies"""
+
+    session = await aiohttp_session.get_session(request)
+    session.invalidate()
+    return HTTPFound(location=f'/')
+
+
 @routes.post('/guilds/{guild_id}/update_custom_commands')
 async def update_custom_commands(request:Request):
     """Copy the given data into the database as necessary"""
