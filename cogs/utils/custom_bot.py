@@ -56,16 +56,20 @@ class CustomBot(commands.AutoShardedBot):
         self.guild_settings = collections.defaultdict(self.DEFAULT_GUILD_SETTINGS.copy)
         self.custom_commands = collections.defaultdict(lambda: collections.defaultdict(list))  # CommandName: {GuildID: [Reponses]}
 
-    def get_invite_link(self, **kwargs):
+    def get_invite_link(self, *, redirect_uri:str=None, guild_id:str=None, **kwargs):
         """Gets the invite link for the bot, with permissions all set properly"""
 
         permissions = discord.Permissions()
+        redirect_uri = redirect_uri or ""
+        guild_id = guild_id or ""
         for name, value in kwargs.items():
             setattr(permissions, name, value)
         return 'https://discordapp.com/oauth2/authorize?' + urlencode({
-            'client_id': self.user.id,
+            'client_id': self.config['oauth']['client_id'],
             'scope': 'bot',
-            'permissions': permissions.value
+            'permissions': permissions.value,
+            'guild_id': guild_id,
+            'redirect_uri': redirect_uri,
         })
 
     @property

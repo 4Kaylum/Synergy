@@ -17,6 +17,14 @@ async def login(request:Request):
     return HTTPFound(location=f'/')
 
 
+@routes.get('/login_redirect/guilds')
+async def guild_login(request:Request):
+    """Page the discord login redirects the user to when successfully logged in with Discord"""
+
+    guild_id = request.query.get('guild_id')
+    return HTTPFound(location=f'/guilds/{guild_id}')
+
+
 @routes.post('/guilds/{guild_id}/update_custom_commands')
 async def update_custom_commands(request:Request):
     """Copy the given data into the database as necessary"""

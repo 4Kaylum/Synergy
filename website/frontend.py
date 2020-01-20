@@ -63,7 +63,10 @@ async def guild_settings(request:Request):
             return HTTPFound(location='/guilds')
 
     # Get guild object for in case I force my way in here
-    guild_object = await request.app['bot'].fetch_guild(guild_id)
+    try:
+        guild_object = await request.app['bot'].fetch_guild(guild_id)
+    except discord.Forbidden:
+        return HTTPFound(location=request.app['bot'].get_invite_link(guild_id=guild_id, redirect_uri="https://synergy.callumb.co.uk/login_redirect/guilds", read_messages=True))
 
     # Get interaction info
     interactions = collections.defaultdict(list)
@@ -88,7 +91,7 @@ async def login(request:Request):
 
     login_url = webutils.get_discord_login_url(
         request,
-        redirect_uri="http://127.0.0.1:8080/login_redirect",
+        redirect_uri="https://synergy.callumb.co.uk/login_redirect",
         oauth_scopes=['identify', 'guilds'],
     )
     return HTTPFound(location=login_url)
