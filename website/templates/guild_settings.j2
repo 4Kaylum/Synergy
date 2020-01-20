@@ -47,7 +47,7 @@
 
                             {% for text in responses %}
                                 <div class="input-group mt-1">
-                                    <input type="text" class="form-control" placeholder="A response for an interaction" value="{{ text }}" />
+                                    <input type="text" class="form-control" placeholder="A response for an interaction" value="{{ text }}" required />
                                     <div class="input-group-append">
                                         <button class="btn btn-danger" type="button" onclick="$(this.parentNode.parentNode).remove()">-</button>
                                     </div>
@@ -59,6 +59,11 @@
                 </form> <!-- card -->
             {% endfor %}
         </div> <!-- accordion -->
+
+        <button class="btn btn-primary w-100 mb-3 mt-3" type="button" onclick="submitCommandChanges();">
+            Submit Command Changes
+        </button>
+
     </div> <!-- row -->
 
 </div>
