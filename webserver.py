@@ -43,6 +43,7 @@ session_setup(app, ECS(os.urandom(32), max_age=1000000))  # Encrypted cookies
 jinja_setup(app, loader=FileSystemLoader(os.getcwd() + '/website/templates'))
 app.router.add_routes(website.frontend_routes)
 app.router.add_routes(website.backend_routes)
+app.router.add_routes(website.api_routes)
 app.router.add_static('/static', os.getcwd() + '/website/static', append_version=True)
 
 # Add our connections
