@@ -1,4 +1,3 @@
-import random
 import re as regex
 
 from discord.ext import commands
@@ -19,11 +18,23 @@ class InteractionHandler(utils.Cog):
         # Check responses
         command_name = ctx.invoked_with.lower()
         async with self.bot.database() as db:
-            responses = await db("SELECT command_response.response FROM command_response, command_names WHERE command_response.guild_id=command_names.guild_id AND command_response.command_name=$1 and command_response.guild_id=$2", command_name, ctx.guild.id)
+            responses = await db("SELECT command_responses.response FROM command_responses, command_names WHERE command_responses.guild_id=command_names.guild_id AND command_responses.command_name=$1 and command_responses.guild_id=$2 ORDER BY RANDOM()", command_name, ctx.guild.id)
         if not responses:
             return
-        text = random.choice(responses)['response']
-        await ctx.send(text.replace(r"%author", ctx.author.mention))  # TODO mention target
+
+        # Check if another user was mentioned
+        matches = regex.search(f"(?:{command_name} )(.*)", ctx.message.content)
+        if not matches:
+            return
+        try:
+            user = await commands.MemberConverter().convert(ctx, matches.group(1))
+        except commands.CommandError as e:
+            print(e)
+            return
+
+        # Output
+        text = responses[0]['response']
+        await ctx.send(text.replace(r"%author", ctx.author.mention).replace(r"%user", user.mention))
 
     @commands.command(cls=utils.Command, enabled=False)
     @commands.has_permissions(manage_messages=True)
