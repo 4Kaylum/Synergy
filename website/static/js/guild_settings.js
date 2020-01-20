@@ -61,6 +61,7 @@ function submitCommandChanges() {
     $.post(`${window.location.pathname}/update_custom_commands`, commandList)
         .done(function(data) {
             console.log(data);
+            alert("Submitted.");
+            location.reload();
         });
-    location.reload();
 }

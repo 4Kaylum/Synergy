@@ -44,7 +44,10 @@ async def process_discord_login(request:Request, oauth_scopes:list=None):
         'scope': ' '.join(oauth_scopes),
         **oauth_data,
     }
-    data['redirect_uri'] = "{0.scheme}://{0.host}:{0.port}{0.path}".format(request.url)
+    if request.url.explicit_port:
+        data['redirect_uri'] = "{0.scheme}://{0.host}:{0.port}{0.path}".format(request.url)
+    else:
+        data['redirect_uri'] = "https://{0.host}{0.path}".format(request.url)
     headers = {
         'Content-Type': 'application/x-www-form-urlencoded'
     }
@@ -59,6 +62,9 @@ async def process_discord_login(request:Request, oauth_scopes:list=None):
         token_url = f"https://discordapp.com/api/v6/oauth2/token"
         async with session.post(token_url, data=data, headers=headers) as r:
             token_info = await r.json()
+            if token_info.get('error'):
+                print(token_info)
+                return  # :c
 
         # Update headers
         headers.update({
