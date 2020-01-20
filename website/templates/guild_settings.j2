@@ -20,6 +20,11 @@
     </div> <!-- row -->
 
     <div class="row" id="guild-settings-accordion-holder">
+
+        <button class="btn btn-secondary w-100 mb-3 mt-3" type="button" onclick="addNewCommand();">
+            Add new response
+        </button>
+
         <div class="accordion w-100" id="guild-settings-accordion">
             {% for name, responses in interactions.items() %}
                 <form class="card interaction-form" data-interaction-name="{{ name }}">
@@ -41,7 +46,7 @@
 
                             {% for text in responses %}
                                 <div class="input-group mt-1">
-                                    <input type="text", class="form-control" placeholder="A response for an interaction" value="{{ text }}" />
+                                    <input type="text" class="form-control" placeholder="A response for an interaction" value="{{ text }}" />
                                     <div class="input-group-append">
                                         <button class="btn btn-danger" type="button" onclick="$(this.parentNode.parentNode).remove()">-</button>
                                     </div>
