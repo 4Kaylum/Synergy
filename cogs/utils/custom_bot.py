@@ -54,6 +54,7 @@ class CustomBot(commands.AutoShardedBot):
 
         # Here's the storage for cached stuff
         self.guild_settings = collections.defaultdict(self.DEFAULT_GUILD_SETTINGS.copy)
+        self.custom_commands = collections.defaultdict(lambda: collections.defaultdict(list))  # CommandName: {GuildID: [Reponses]}
 
     def get_invite_link(self, **kwargs):
         """Gets the invite link for the bot, with permissions all set properly"""
@@ -90,6 +91,24 @@ class CustomBot(commands.AutoShardedBot):
             raise e
         for row in guild_data:
             self.guild_settings[row['guild_id']] = dict(row)
+
+        # Get stored commands
+        try:
+            command_data = await db("SELECT * FROM command_names")
+        except Exception as e:
+            self.logger.critical("Error selecting from command_names")
+            raise e
+        for row in command_data:
+            self.custom_commands[row['guild_id']][row['command_name']]  # TODO store nsfw and enabled here too
+
+        # Get command responses
+        try:
+            response_data = await db("SELECT * FROM command_responses")
+        except Exception as e:
+            self.logger.critical("Error selecting from command_responses")
+            raise e
+        for row in response_data:
+            self.custom_commands[row['guild_id']][row['command_name']].append(row['response'])
 
         # Wait for the bot to cache users before continuing
         self.logger.debug("Waiting until ready before completing startup method.")
