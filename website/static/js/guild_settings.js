@@ -58,7 +58,9 @@ function getInteractionResponses() {
 
 function submitCommandChanges() {
     const commandList = getInteractionResponses();
-    for (let [commandName, responseList] of Object.entries(commandList)) {
-        console.log(`${commandName}: ${responseList}`);
-    }
+    $.post(`${window.location.pathname}/update_custom_commands`, commandList)
+        .done(function(data) {
+            console.log(data);
+        });
+    location.reload();
 }
