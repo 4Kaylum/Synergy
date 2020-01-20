@@ -1,4 +1,5 @@
 import random
+import re as regex
 
 from discord.ext import commands
 
@@ -17,13 +18,14 @@ class InteractionHandler(utils.Cog):
 
         # Check responses
         command_name = ctx.invoked_with.lower()
-        guild_commands = self.bot.custom_commands[ctx.guild.id]
-        if command_name not in guild_commands:
+        async with self.bot.database() as db:
+            responses = await db("SELECT command_response.response FROM command_response, command_names WHERE command_response.guild_id=command_names.guild_id AND command_response.command_name=$1 and command_response.guild_id=$2", command_name, ctx.guild.id)
+        if not responses:
             return
-        guild_respones = guild_commands[command_name]
-        await ctx.send(random.choice(guild_respones))
+        text = random.choice(responses)['response']
+        await ctx.send(text.replace(r"%author", ctx.author.mention))  # TODO mention target
 
-    @commands.command(cls=utils.Command)
+    @commands.command(cls=utils.Command, enabled=False)
     @commands.has_permissions(manage_messages=True)
     @commands.guild_only()
     async def addcommand(self, ctx:utils.Context, name:str):
@@ -48,7 +50,7 @@ class InteractionHandler(utils.Cog):
         # Done
         await ctx.send(f"Added `{name.lower()}` as a custom command to your guild.")
 
-    @commands.command(cls=utils.Command)
+    @commands.command(cls=utils.Command, enabled=False)
     @commands.has_permissions(manage_messages=True)
     @commands.guild_only()
     async def addresponse(self, ctx:utils.Context, name:str, *, response:str):
@@ -73,7 +75,7 @@ class InteractionHandler(utils.Cog):
         # Done
         await ctx.send(f"Added `{response}` to the response list for the `{name.lower()}` command.")
 
-    @commands.command(cls=utils.Command)
+    @commands.command(cls=utils.Command, enabled=False)
     @commands.guild_only()
     async def interactions(self, ctx:utils.Context):
         """Lists all the interactions that are registered for your server"""
@@ -81,7 +83,7 @@ class InteractionHandler(utils.Cog):
         guild_commands = self.bot.custom_commands[ctx.guild.id]
         await ctx.send('\n'.join([f"`{i}` command - `{len(o)}` responses" for i, o in guild_commands.items()]))
 
-    @commands.command(cls=utils.Command)
+    @commands.command(cls=utils.Command, enabled=False)
     @commands.guild_only()
     async def responses(self, ctx:utils.Context, name:str):
         """Lists all the responses for a given interaction"""
