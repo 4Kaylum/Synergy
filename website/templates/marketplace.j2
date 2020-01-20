@@ -1,0 +1,25 @@
+{% extends "layout/base.j2" %}
+
+{% block scripts %}
+<script src="{{ static('js/marketplace.js') }}" type="text/javascript"></script>
+<script type="text/javascript">populateCommandDeck();</script>
+{% endblock scripts %}
+
+{% block content %}
+<div class="container mt-3">
+
+    <div class="row">
+        <div class="col">
+            <p>Lorem ipsum explaining how these are commands that other people have made</p>
+        </div> <!-- col -->
+    </div> <!-- row -->
+
+    <div class="row">
+        <div class="col">
+            <div class="card-columns" id="commands-card-deck">
+            </div><!-- card-columns-->
+        </div> <!-- col -->
+    </div> <!-- row -->
+
+</div>
+{% endblock content%}

@@ -20,6 +20,15 @@ async def index(request:Request):
     return {}
 
 
+@routes.get("/marketplace")
+@template('marketplace.j2')
+@webutils.add_output_args()
+async def marketplace(request:Request):
+    """The marketplace for the bot - lists commands and responses"""
+
+    return {}
+
+
 @routes.get("/guilds")
 @template('guild_picker.j2')
 @webutils.add_output_args()
