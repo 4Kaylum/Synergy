@@ -24,6 +24,8 @@ class InteractionHandler(utils.Cog):
         await ctx.send(random.choice(guild_respones))
 
     @commands.command(cls=utils.Command)
+    @commands.has_permissions(manage_messages=True)
+    @commands.guild_only()
     async def addcommand(self, ctx:utils.Context, name:str):
         """Adds a custom command to your guild, which you can then add responses to"""
 
@@ -47,6 +49,8 @@ class InteractionHandler(utils.Cog):
         await ctx.send(f"Added `{name.lower()}` as a custom command to your guild.")
 
     @commands.command(cls=utils.Command)
+    @commands.has_permissions(manage_messages=True)
+    @commands.guild_only()
     async def addresponse(self, ctx:utils.Context, name:str, *, response:str):
         """Adds a response to your custom command"""
 
@@ -68,6 +72,24 @@ class InteractionHandler(utils.Cog):
 
         # Done
         await ctx.send(f"Added `{response}` to the response list for the `{name.lower()}` command.")
+
+    @commands.command(cls=utils.Command)
+    @commands.guild_only()
+    async def interactions(self, ctx:utils.Context):
+        """Lists all the interactions that are registered for your server"""
+
+        guild_commands = self.bot.custom_commands[ctx.guild.id]
+        await ctx.send('\n'.join([f"`{i}` command - `{len(o)}` responses" for i, o in guild_commands.items()]))
+
+    @commands.command(cls=utils.Command)
+    @commands.guild_only()
+    async def responses(self, ctx:utils.Context, name:str):
+        """Lists all the responses for a given interaction"""
+
+        guild_commands = self.bot.custom_commands[ctx.guild.id]
+        if name.lower() not in guild_commands:
+            return await ctx.send(f"The custom command `{name.lower()}` doesn't exist for this guild.")
+        await ctx.send('* ' + '\n* '.join([i for i in guild_commands[name.lower()]]))
 
 
 def setup(bot:utils.CustomBot):
