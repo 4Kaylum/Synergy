@@ -29,7 +29,8 @@ function addNewCommand() {
                     <div class="card-body">
 
                         <div class="input-group">
-                            <button class="btn btn-primary w-100" type="button" onclick="addNewResponse(this.parentNode.parentNode);">Add new response</button>
+                            <button class="btn btn-primary w-50" type="button" onclick="addNewResponse(this.parentNode.parentNode);">Add new response</button>
+                            <button class="btn btn-secondary w-50" type="button" onclick="addNewResponse($(this.parentNode.parentNode.parentNode.parentNode.parentNode).remove());">Delete command</button>
                         </div>
                     </div>
                 </div>
