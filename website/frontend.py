@@ -39,7 +39,7 @@ async def guild_picker(request:Request):
     # Check session age
     session = await aiohttp_session.get_session(request)
     if session.new:
-        return HTTPFound(location='/')
+        return HTTPFound(location='/discord_oauth_login')
 
     # Return information
     user_guilds = await webutils.get_user_guilds(request)
@@ -63,7 +63,7 @@ async def guild_settings(request:Request):
     # Check session age
     session = await aiohttp_session.get_session(request)
     if session.new:
-        return HTTPFound(location='/')
+        return HTTPFound(location='/discord_oauth_login')
 
     # Check user permissions
     if session['user_id'] not in request.app['config']['owners']:
@@ -95,7 +95,8 @@ async def guild_settings(request:Request):
         {
             'guild': guild_object,
             'interactions': interactions,
-            'session': session
+            'session': session,
+            'highlight': request.query.get('highlight'),
         },
     )
 
@@ -109,7 +110,7 @@ async def copy_to_guild(request:Request):
     # Check session age
     session = await aiohttp_session.get_session(request)
     if session.new:
-        return HTTPFound(location='/')
+        return HTTPFound(location='/discord_oauth_login')
 
     # Build data
     query_data = collections.defaultdict(list)
@@ -140,7 +141,7 @@ async def copy_to_guild_redirect(request:Request):
     # Check session age
     session = await aiohttp_session.get_session(request)
     if session.new:
-        return HTTPFound(location='/')
+        return HTTPFound(location='/discord_oauth_login')
 
     # Check user permissions
     if session['user_id'] not in request.app['config']['owners']:
@@ -170,12 +171,12 @@ async def copy_to_guild_redirect(request:Request):
                 pass
 
     # Redirect
-    return HTTPFound(location=f"/guilds/{guild_id}")
+    return HTTPFound(location=f"/guilds/{guild_id}?highlight={i}")
 
 
 @routes.get("/discord_oauth_login")
 async def login(request:Request):
-    """Index of the website"""
+    """A redirect to the login page"""
 
     login_url = webutils.get_discord_login_url(
         request,

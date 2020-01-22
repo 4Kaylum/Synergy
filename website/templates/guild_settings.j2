@@ -27,7 +27,7 @@
 
         <div class="card-columns" id="guild-settings-accordion">
             {% for name, responses in interactions.items() %}
-                <form class="card interaction-form" data-interaction-name="{{ name }}">
+                <form class="card interaction-form{% if name == highlight %} bg-info{% endif %}" data-interaction-name="{{ name }}">
 
                     <div class="card-header" id="interaction-command-{{ name }}">
                         {{ name }} command
