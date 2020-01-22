@@ -7,7 +7,10 @@ function addNewResponse(formNode) {
             </div>
         </div>
     `);
-    $(formNode).append(newResponseTag);
+    var formNodeJQ = $(formNode);
+    formNodeJQ.append(newResponseTag);
+    // var header = formNodeJQ.find((node) => node.class == "card-header");
+    // header.innerHTML = `${header.data}`;
     return false;
 }
 
@@ -44,6 +47,16 @@ function getInteractionResponses() {
             .filter(x => x.length > 0);
     });
     return output;
+}
+
+
+function getSharingURL() {
+    const commandList = getInteractionResponses();
+    var responsePair = [];
+    Object.keys(commandList).map(k => commandList[k].forEach(v => responsePair.push([k, v])));
+    var esc = encodeURIComponent;
+    var query = responsePair.map(i => `${esc(i[0])}=${esc(i[1])}`).join("&");
+    return btoa(query);
 }
 
 
