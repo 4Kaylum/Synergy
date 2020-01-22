@@ -40,7 +40,7 @@
                         </div>
                         {% for text in responses %}
                             <div class="input-group mt-1">
-                                <input type="text" class="form-control" placeholder="A response for an interaction" value="{{ text }}" required />
+                                <input type="text" data-input-type="response" class="form-control" placeholder="A response for an interaction" value="{{ text }}" required />
                                 <div class="input-group-append">
                                     <button class="btn btn-danger" type="button" onclick="$(this.parentNode.parentNode).remove()">-</button>
                                 </div>

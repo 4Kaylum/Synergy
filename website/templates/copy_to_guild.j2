@@ -1,0 +1,20 @@
+{% extends "guild_picker.j2" %}
+
+{% block copy_to_guild %}
+<div class="row">
+    <div class="col">
+        <h2 class="text-center">Copying data to guild</h2>
+        {% for command, response in query_data %}
+        <ul>
+            <li>{{ command }}</li>
+            <ul>
+                <li>{{ response }}</li>
+            </ul>
+        </ul>
+        {% endfor %}
+    </div> <!-- col -->
+</div> <!-- row -->
+{% endblock copy_to_guild %}
+
+{% block guild_base_url %}/copy_to_guild/{% endblock guild_base_url %}
+{% block guild_end_url %}?{{ request.url.query_string }}{% endblock guild_end_url %}
