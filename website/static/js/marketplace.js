@@ -1,6 +1,6 @@
 function populateCommandDeck() {
     const deck = $('#commands-card-deck');
-    $.get('/api/v1/interactions?limit=30', function(data) {
+    $.get('/api/v1/interactions?limit=100', function(data) {
         data.forEach(element => {
             deck.append($(`
                 <div class="card">

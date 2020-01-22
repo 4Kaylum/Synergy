@@ -81,10 +81,10 @@ async def guild_settings(request:Request):
     # Get interaction info
     interactions = collections.defaultdict(list)
     async with request.app['database']() as db:
-        command_info = await db('SELECT command_name FROM command_names WHERE guild_id=$1', guild_id)
-        command_responses = await db('SELECT command_name, response FROM command_responses WHERE guild_id=$1', guild_id)
-    for command in command_info:
-        interactions[command['command_name']]
+        # command_info = await db('SELECT command_name FROM command_names WHERE guild_id=$1', guild_id)
+        command_responses = await db('SELECT command_name, response FROM command_responses WHERE guild_id=$1 ORDER BY response ASC', guild_id)
+    # for command in command_info:
+    #     interactions[command['command_name']]
     for response in command_responses:
         interactions[response['command_name']].append(response['response'])
 
