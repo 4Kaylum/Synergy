@@ -36,73 +36,24 @@ class InteractionHandler(utils.Cog):
         text = responses[0]['response']
         await ctx.send(text.replace(r"%author", ctx.author.mention).replace(r"%user", user.mention))
 
-    @commands.command(cls=utils.Command, enabled=False)
-    @commands.has_permissions(manage_messages=True)
-    @commands.guild_only()
-    async def addcommand(self, ctx:utils.Context, name:str):
-        """Adds a custom command to your guild, which you can then add responses to"""
-
-        # Validate name
-        if name.count(' ') > 0:
-            return await ctx.send("Your custom command can only be one word.")
-        if len(name) > 30:
-            return await ctx.send("Your custom command can only be 30 characters long.")
-
-        # Cache command
-        guild_commands = self.bot.custom_commands[ctx.guild.id]
-        if name.lower() in guild_commands:
-            return await ctx.send("Your custom command already exists.")
-        guild_commands[name.lower()]
-
-        # Database command
-        async with self.bot.database() as db:
-            await db("INSERT INTO command_names (guild_id, command_name) VALUES ($1, $2)", ctx.guild.id, name.lower())
-
-        # Done
-        await ctx.send(f"Added `{name.lower()}` as a custom command to your guild.")
-
-    @commands.command(cls=utils.Command, enabled=False)
-    @commands.has_permissions(manage_messages=True)
-    @commands.guild_only()
-    async def addresponse(self, ctx:utils.Context, name:str, *, response:str):
-        """Adds a response to your custom command"""
-
-        # Validate name
-        guild_commands = self.bot.custom_commands[ctx.guild.id]
-        if name not in guild_commands:
-            return await ctx.send(f"The custom command `{name.lower()}` doesn't exist for your guild - make it with the `addcommand` command.")
-        if name.count(' ') > 0:
-            return await ctx.send("Your custom command can only be one word.")
-        if len(name) > 30:
-            return await ctx.send("Your custom command can only be 30 characters long.")
-
-        # Add to cache
-        self.bot.custom_commands[ctx.guild.id][name.lower()].append(response)
-
-        # Database
-        async with self.bot.database() as db:
-            await db("INSERT INTO command_responses (guild_id, command_name, response) VALUES ($1, $2, $3)", ctx.guild.id, name.lower(), response)
-
-        # Done
-        await ctx.send(f"Added `{response}` to the response list for the `{name.lower()}` command.")
-
-    @commands.command(cls=utils.Command, enabled=False)
+    @commands.command(cls=utils.Command)
     @commands.guild_only()
     async def interactions(self, ctx:utils.Context):
         """Lists all the interactions that are registered for your server"""
 
-        guild_commands = self.bot.custom_commands[ctx.guild.id]
-        await ctx.send('\n'.join([f"`{i}` command - `{len(o)}` responses" for i, o in guild_commands.items()]))
+        async with self.bot.database() as db:
+            guild_commands = await db("SELECT command_name, count(response) FROM command_responses WHERE guild_id=$1 GROUP BY command_name", ctx.guild.id)
+        await ctx.send('\n'.join([f"`{row['command_name']}` command - `{row['count']}` responses" for row in guild_commands]))
 
-    @commands.command(cls=utils.Command, enabled=False)
-    @commands.guild_only()
-    async def responses(self, ctx:utils.Context, name:str):
-        """Lists all the responses for a given interaction"""
+    # @commands.command(cls=utils.Command, enabled=False)
+    # @commands.guild_only()
+    # async def responses(self, ctx:utils.Context, name:str):
+    #     """Lists all the responses for a given interaction"""
 
-        guild_commands = self.bot.custom_commands[ctx.guild.id]
-        if name.lower() not in guild_commands:
-            return await ctx.send(f"The custom command `{name.lower()}` doesn't exist for this guild.")
-        await ctx.send('* ' + '\n* '.join([i for i in guild_commands[name.lower()]]))
+    #     guild_commands = self.bot.custom_commands[ctx.guild.id]
+    #     if name.lower() not in guild_commands:
+    #         return await ctx.send(f"The custom command `{name.lower()}` doesn't exist for this guild.")
+    #     await ctx.send('* ' + '\n* '.join([i for i in guild_commands[name.lower()]]))
 
 
 def setup(bot:utils.CustomBot):
