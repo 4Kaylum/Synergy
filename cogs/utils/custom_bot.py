@@ -6,6 +6,7 @@ from urllib.parse import urlencode
 import os
 import asyncio
 import collections
+import typing
 
 import aiohttp
 import discord
@@ -120,6 +121,7 @@ class CustomBot(commands.AutoShardedBot):
 
         # Remove caches
         self.logger.debug("Clearing caches")
+        self.guild_settings.clear()
 
         # Get database connection
         db = await self.database.get_connection()
@@ -128,8 +130,8 @@ class CustomBot(commands.AutoShardedBot):
         try:
             guild_data = await db("SELECT * FROM guild_settings")
         except Exception as e:
-            self.logger.critical("Error selecting from guild_settings")
-            raise e
+            self.logger.critical(f"Error selecting from guild_settings - {e}")
+            exit(1)
         for row in guild_data:
             self.guild_settings[row['guild_id']] = dict(row)
 
