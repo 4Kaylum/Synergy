@@ -11,15 +11,15 @@ class ErrorHandler(utils.Cog):
         instead. If it fails that too, it just stays silent."""
 
         try:
-            await ctx.send(text)
+            return await ctx.send(text)
         except discord.Forbidden:
             try:
-                await ctx.author.send(author_text or text)
+                return await ctx.author.send(author_text or text)
             except discord.Forbidden:
                 pass
         except discord.NotFound:
             pass
-        return
+        return None
 
     @utils.Cog.listener()
     async def on_command_error(self, ctx:utils.Context, error:commands.CommandError):
@@ -37,12 +37,12 @@ class ErrorHandler(utils.Cog):
             commands.MissingAnyRole, commands.MissingPermissions,
             commands.MissingRole, commands.CommandOnCooldown, commands.DisabledCommand,
         )
-        if ctx.author.id in self.bot.owners and isinstance(error, owner_reinvoke_errors):
+        if ctx.original_author.id in self.bot.owner_ids and isinstance(error, owner_reinvoke_errors):
             return await ctx.reinvoke()
 
         # Missing argument
         elif isinstance(error, commands.MissingRequiredArgument):
-            return await ctx.send(f"You're missing the `{error.param.name}` parameter, which is needed for this command to work properly.")
+            return await ctx.send(f"You're missing the `{error.param.name}` argument, which is required for this command to work properly.")
 
         # Argument conversion error
         elif isinstance(error, commands.BadArgument):
@@ -92,6 +92,6 @@ class ErrorHandler(utils.Cog):
         raise error
 
 
-def setup(bot:utils.CustomBot):
+def setup(bot:utils.Bot):
     x = ErrorHandler(bot)
     bot.add_cog(x)

@@ -55,11 +55,17 @@ class CustomHelpCommand(commands.MinimalHelpCommand):
         help_embed = self.get_initial_embed()
 
         # Add each command to the embed
+        command_strings = []
         for cog, cog_commands in runnable_commands.items():
             get_string = lambda c: f"{self.clean_prefix}{c.qualified_name} - *{c.short_doc}*" if c.short_doc else f"{self.clean_prefix}{c.qualified_name}"
             value = '\n'.join([get_string(command) for command in cog_commands])
+            command_strings.append((getattr(cog, 'get_name', lambda: cog.name)(), value))
+
+        # Order embed by length before embedding
+        command_strings.sort(key=lambda x: len(x[1]), reverse=True)
+        for name, value in command_strings:
             help_embed.add_field(
-                name=getattr(cog, 'get_name', lambda: cog.name)(),
+                name=name,
                 value=value,
             )
 
@@ -91,7 +97,7 @@ class CustomHelpCommand(commands.MinimalHelpCommand):
 
 class Help(utils.Cog):
 
-    def __init__(self, bot:utils.CustomBot):
+    def __init__(self, bot:utils.Bot):
         super().__init__(bot)
         self._original_help_command = bot.help_command
         bot.help_command = CustomHelpCommand()
@@ -101,6 +107,6 @@ class Help(utils.Cog):
         self.bot.help_command = self._original_help_command
 
 
-def setup(bot:utils.CustomBot):
+def setup(bot:utils.Bot):
     x = Help(bot)
     bot.add_cog(x)

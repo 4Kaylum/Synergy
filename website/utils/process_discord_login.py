@@ -45,7 +45,7 @@ async def process_discord_login(request:Request, oauth_scopes:list=None):
         **oauth_data,
     }
     if request.url.explicit_port:
-        data['redirect_uri'] = "{0.scheme}://{0.host}:{0.port}{0.path}".format(request.url)
+        data['redirect_uri'] = "http://{0.host}:{0.port}{0.path}".format(request.url)
     else:
         data['redirect_uri'] = "https://{0.host}{0.path}".format(request.url)
     headers = {
@@ -63,8 +63,7 @@ async def process_discord_login(request:Request, oauth_scopes:list=None):
         async with session.post(token_url, data=data, headers=headers) as r:
             token_info = await r.json()
             if token_info.get('error'):
-                print(token_info)
-                return  # :c
+                return  # Error getting the token, just ignore it
 
         # Update headers
         headers.update({
@@ -82,14 +81,6 @@ async def process_discord_login(request:Request, oauth_scopes:list=None):
             session_storage['user_id'] = int(user_info['id'])
             session_storage['logged_in'] = True
 
-        # Get guilds
-        # if "guilds" in oauth_scopes:
-        #     guilds_url = f"https://discordapp.com/api/v6/users/@me/guilds"
-        #     async with session.get(guilds_url, headers=headers) as r:
-        #         guild_info = await r.json()
-        #     session_storage['guild_info'] = [
-        #         {o: i[o] for o in ['id', 'name', 'icon', 'permissions', 'owner']} for i in guild_info
-        #     ]
 
 async def get_user_guilds(request:Request):
     """Process the login from Discord and store relevant data in the session"""
@@ -111,6 +102,3 @@ async def get_user_guilds(request:Request):
             guild_info = await r.json()
 
     return guild_info
-    # session_storage['guild_info'] = [
-    #     {o: i[o] for o in ['id', 'name', 'icon', 'permissions', 'owner']} for i in guild_info
-    # ]

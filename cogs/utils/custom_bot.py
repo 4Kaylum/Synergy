@@ -12,6 +12,7 @@ import discord
 from discord.ext import commands
 
 from cogs.utils.database import DatabaseConnection
+from cogs.utils.custom_context import CustomContext
 
 
 def get_prefix(bot, message:discord.Message):
@@ -28,13 +29,17 @@ class CustomBot(commands.AutoShardedBot):
     doing my own stuff"""
 
     def __init__(self, config_file:str='config/config.toml', logger:logging.Logger=None, *args, **kwargs):
-        super().__init__(command_prefix=get_prefix, *args, **kwargs)
+        """The initialiser for the bot object
+        Note that we load the config before running the original method"""
 
         # Store the config file for later
         self.config = None
         self.config_file = config_file
         self.logger = logger or logging.getLogger("bot")
         self.reload_config()
+
+        # Run original
+        super().__init__(command_prefix=get_prefix, *args, **kwargs)
 
         # Set up our default guild settings
         self.DEFAULT_GUILD_SETTINGS = {
@@ -53,29 +58,62 @@ class CustomBot(commands.AutoShardedBot):
         self.startup_method = None
 
         # Here's the storage for cached stuff
-        pass
+        self.guild_settings = collections.defaultdict(self.DEFAULT_GUILD_SETTINGS.copy)
 
-    def get_invite_link(self, *, redirect_uri:str=None, guild_id:str=None, **kwargs):
+    def get_invite_link(self, *, join_server_redirect_uri:str=None, guild_id:int=None, **kwargs):
         """Gets the invite link for the bot, with permissions all set properly"""
 
         permissions = discord.Permissions()
-        redirect_uri = redirect_uri or ""
-        guild_id = guild_id or ""
         for name, value in kwargs.items():
             setattr(permissions, name, value)
-        return 'https://discordapp.com/oauth2/authorize?' + urlencode({
-            'client_id': self.config['oauth']['client_id'],
+        data = {
+            'client_id': self.config.get('oauth', {}).get('client_id', None) or self.user.id,
             'scope': 'bot',
-            'permissions': permissions.value,
-            'guild_id': guild_id,
-            'redirect_uri': redirect_uri,
-        })
+            'permissions': permissions.value
+        }
+        if join_server_redirect_uri:
+            data['redirect_uri'] = join_server_redirect_uri
+        if guild_id:
+            data['guild_id'] = guild_id
+        return 'https://discordapp.com/oauth2/authorize?' + urlencode(data)
+
+    async def add_delete_button(self, message:discord.Message, valid_users:typing.List[discord.User], *, timeout=60.0):
+        """Adds a delete button to the given message"""
+
+        # Add reaction
+        await message.add_reaction("\N{WASTEBASKET}")
+
+        # Wait for response
+        check = lambda r, u: all([
+            r.message.id == message.id,
+            u.id in [user.id for user in valid_users],
+            str(r.emoji) == "\N{WASTEBASKET}"
+        ])
+        try:
+            await self.wait_for("reaction_add", check=check, timeout=timeout)
+        except asyncio.TimeoutError:
+            try:
+                return await message.remove_reaction("\N{WASTEBASKET}", self.user)
+            except Exception:
+                return
+
+        # We got a response
+        try:
+            await message.delete()
+        except (discord.Forbidden, discord.NotFound):
+            return  # Ah well
 
     @property
-    def owners(self) -> list:
+    def owner_ids(self) -> list:
         """Gives you a list of the owner IDs"""
 
         return self.config['owners']
+
+    @owner_ids.setter
+    def owner_ids(self, value):
+        """A setter method so that the original bot object doesn't complain"""
+
+        pass
 
     async def startup(self):
         """Clears all the bot's caches and fills them from a DB read"""
@@ -112,7 +150,7 @@ class CustomBot(commands.AutoShardedBot):
     async def get_context(self, message, *, cls=commands.Context):
         """Gently insert a new original_author field into the context"""
 
-        ctx = await super().get_context(message, cls=cls)
+        ctx = await super().get_context(message, cls=CustomContext)
         if ctx.guild:
             ctx.original_author = ctx.guild.get_member(message.author.id)
         else:

@@ -56,6 +56,6 @@ class InteractionHandler(utils.Cog):
     #     await ctx.send('* ' + '\n* '.join([i for i in guild_commands[name.lower()]]))
 
 
-def setup(bot:utils.CustomBot):
+def setup(bot:utils.Bot):
     x = InteractionHandler(bot)
     bot.add_cog(x)
