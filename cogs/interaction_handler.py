@@ -30,18 +30,15 @@ class InteractionHandler(utils.Cog):
         ctx.command = metacommand
         ctx.responses = responses
         try:
-            await ctx.command.invoke(ctx)  # This converts the args for me, which is nice
+            await ctx.command.invoke_ignoring_meta(ctx)  # This converts the args for me, which is nice
         except commands.CommandError as e:
             self.bot.dispatch("command_error", ctx, e)
 
     @commands.command(cls=utils.Command, hidden=True)
+    @utils.checks.meta_command()
     @commands.guild_only()
     async def interaction_response_metacommand(self, ctx:utils.Context, users:commands.Greedy[discord.Member]):
         """Handles pinging out the responses for a given interaction. Users cannot call this."""
-
-        # Make sure that my users aren't bein fuckin dumb
-        if ctx.invoked_with.lower() == 'interaction_response_metacommand':
-            return  # :/
 
         # Get user amount
         MAX_MENTIONS = 1  # TODO read from db
