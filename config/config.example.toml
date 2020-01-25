@@ -15,7 +15,7 @@ guild_id = 1  # The ID of the main/support guild
     database = "database_name"
     host = "127.0.0.1"
     port = 5432
-    enabled = false
+    enabled = true
 
 # This data is passed directly over to aioredis
 [redis]

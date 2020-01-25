@@ -27,10 +27,10 @@ class InteractionHandler(utils.Cog):
         if not matches:
             return
         try:
-            user = await commands.MemberConverter().convert(ctx, matches.group(1))
+            user = await commands.MemberConverter().convert(ctx, matches.group(1).split(' ')[0])
         except commands.CommandError as e:
-            print(e)
-            return
+            return self.bot.dispatch("command_error", ctx, e)
+            raise e  # Couldn't convert member
 
         # Output
         text = responses[0]['response']
@@ -44,16 +44,6 @@ class InteractionHandler(utils.Cog):
         async with self.bot.database() as db:
             guild_commands = await db("SELECT command_name, count(response) FROM command_responses WHERE guild_id=$1 GROUP BY command_name", ctx.guild.id)
         await ctx.send('\n'.join([f"`{row['command_name']}` command - `{row['count']}` responses" for row in guild_commands]))
-
-    # @commands.command(cls=utils.Command, enabled=False)
-    # @commands.guild_only()
-    # async def responses(self, ctx:utils.Context, name:str):
-    #     """Lists all the responses for a given interaction"""
-
-    #     guild_commands = self.bot.custom_commands[ctx.guild.id]
-    #     if name.lower() not in guild_commands:
-    #         return await ctx.send(f"The custom command `{name.lower()}` doesn't exist for this guild.")
-    #     await ctx.send('* ' + '\n* '.join([i for i in guild_commands[name.lower()]]))
 
 
 def setup(bot:utils.Bot):
