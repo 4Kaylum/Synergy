@@ -3,6 +3,8 @@ import typing
 
 from discord.ext import commands
 
+from cogs.utils.checks.meta_command import InvokedMetaCommand
+
 
 class CustomCommand(commands.Command):
 
@@ -22,13 +24,6 @@ class CustomCommand(commands.Command):
             raise ValueError("No mapping found for cooldown")
         self._buckets = mapping(cooldown)  # Wrap the cooldown in the mapping
 
-    def get_help_line(self, ctx:commands.Context):
-        """Gets a simple line describing the command that can go straight into the help"""
-
-        if self.short_doc:
-            return f"{ctx.clean_prefix}{self.qualified_name} - *{self.short_doc}*"
-        return f"{ctx.clean_prefix}{self.qualified_name}"
-
     async def can_run(self, ctx:commands.Context):
         """The normal Command.can_run but it ignores cooldowns"""
 
@@ -41,6 +36,15 @@ class CustomCommand(commands.Command):
 
         bucket = self._buckets.get_bucket(ctx.message)
         return bucket.get_remaining_cooldown()
+
+    async def invoke_ignoring_meta(self, ctx):
+        """Invokes the given ctx, reinvoking when it reaches an InvokedMetaCommand error
+        Throws any other error it finds as normal"""
+
+        try:
+            return await self.invoke(ctx)
+        except InvokedMetaCommand:
+            return await ctx.reinvoke()
 
     def _prepare_cooldowns(self, ctx:commands.Context):
         """Prepares all the cooldowns for the command to be called"""
