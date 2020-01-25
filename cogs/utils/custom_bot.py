@@ -1,19 +1,19 @@
-from datetime import datetime as dt
-import toml
-import glob
-import logging
-from urllib.parse import urlencode
-import os
 import asyncio
 import collections
+import glob
+import logging
 import typing
+from datetime import datetime as dt
+from urllib.parse import urlencode
 
 import aiohttp
 import discord
+import toml
 from discord.ext import commands
 
-from cogs.utils.database import DatabaseConnection
 from cogs.utils.custom_context import CustomContext
+from cogs.utils.database import DatabaseConnection
+from cogs.utils.redis import RedisConnection
 
 
 def get_prefix(bot, message:discord.Message):
@@ -54,6 +54,10 @@ class CustomBot(commands.AutoShardedBot):
         self.database = DatabaseConnection
         self.database.logger = self.logger.getChild('database')
 
+        # Allow redis connections like this
+        self.redis = RedisConnection
+        self.redis.logger = self.logger.getChild('redis')
+
         # Store the startup method so I can see if it completed successfully
         self.startup_time = dt.now()
         self.startup_method = None
@@ -84,12 +88,17 @@ class CustomBot(commands.AutoShardedBot):
         # Add reaction
         await message.add_reaction("\N{WASTEBASKET}")
 
+        # Fix up arguments
+        if not isinstance(valid_users, list):
+            valid_users = [valid_users]
+
         # Wait for response
-        check = lambda r, u: all([
-            r.message.id == message.id,
-            u.id in [user.id for user in valid_users],
-            str(r.emoji) == "\N{WASTEBASKET}"
-        ])
+        def check(r, u) -> bool:
+            return all([
+                r.message.id == message.id,
+                u.id in [user.id for user in valid_users],
+                str(r.emoji) == "\N{WASTEBASKET}"
+            ])
         try:
             await self.wait_for("reaction_add", check=check, timeout=timeout)
         except asyncio.TimeoutError:
@@ -101,11 +110,16 @@ class CustomBot(commands.AutoShardedBot):
         # We got a response
         if delete is None:
             delete = [message]
-        for i in delete:
-            try:
-                await i.delete()
-            except (discord.Forbidden, discord.NotFound):
-                return  # Ah well
+
+        # Try and bulk delete
+        bulk = False
+        if message.guild:
+            permissions: discord.Permissions = message.channel.permissions_for(message.guild.me)
+            bulk = permissions.manage_message and permissions.read_message_history
+        try:
+            await message.channel.purge(check=lambda m: m.id in [i.id for i in delete], bulk=bulk)
+        except Exception:
+            return  # Ah well
 
     @property
     def owner_ids(self) -> list:

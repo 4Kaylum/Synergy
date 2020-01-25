@@ -1,13 +1,12 @@
 import collections
 
-from aiohttp.web import RouteTableDef, Request, HTTPFound, json_response
-from aiohttp_jinja2 import template, render_template
 import aiohttp_session
-import discord
 import asyncpg
+import discord
+from aiohttp.web import HTTPFound, Request, RouteTableDef
+from aiohttp_jinja2 import render_template, template
 
 from website import utils as webutils
-
 
 routes = RouteTableDef()
 

@@ -1,9 +1,4 @@
-from aiohttp.web import RouteTableDef, Request, HTTPFound, json_response
-import aiohttp_session
-import discord
-
-from website import utils as webutils
-
+from aiohttp.web import Request, RouteTableDef, json_response
 
 routes = RouteTableDef()
 
