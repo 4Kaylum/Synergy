@@ -21,20 +21,30 @@ class InteractionHandler(utils.Cog):
             responses = await db("SELECT command_responses.response FROM command_responses, command_names WHERE command_responses.guild_id=command_names.guild_id AND command_responses.command_name=$1 and command_responses.guild_id=$2 ORDER BY RANDOM()", command_name, ctx.guild.id)
         if not responses:
             return
+        metacommand: utils.Command = self.bot.get_command('interaction_response_metacommand')
+        ctx.command = metacommand
+        ctx.responses = responses
+        await self.bot.invoke(ctx)
 
-        # Check if another user was mentioned
-        matches = regex.search(f"(?:{command_name} )(.*)", ctx.message.content)
+    @commands.command(cls=utils.Command, hidden=True)
+    @commands.guild_only()
+    async def interaction_response_metacommand(self, ctx:utils.Context):
+        """Handles pinging out the responses for a given interaction. Users cannot call this."""
+
+        # Make sure that my users aren't bein fuckin dumb
+        if ctx.invoked_with.lower() == 'interaction_response_metacommand':
+            return  # :/
+
+        # Find the user mentioned in the message
+        matches = regex.search(f"(?:{ctx.invoked_with} )(.*)", ctx.message.content)
         if not matches:
-            return
-        try:
-            user = await commands.MemberConverter().convert(ctx, matches.group(1).split(' ')[0])
-        except commands.CommandError as e:
-            return self.bot.dispatch("command_error", ctx, e)
-            raise e  # Couldn't convert member
+            raise utils.errors.MissingRequiredArgumentString('user')
+        user = await commands.MemberConverter().convert(ctx, matches.group(1).split(' ')[0])
 
         # Output
-        text = responses[0]['response']
+        text = ctx.responses[0]['response']
         await ctx.send(text.replace(r"%author", ctx.author.mention).replace(r"%user", user.mention))
+
 
     @commands.command(cls=utils.Command)
     @commands.guild_only()
