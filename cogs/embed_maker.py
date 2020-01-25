@@ -8,7 +8,7 @@ class EmbedMaker(utils.Cog):
 
     def __init__(self, bot:utils.Bot):
         super().__init__(bot)
-        self.load_last_created_embed = {}
+        self.last_made_embed = {}
 
     @commands.command(cls=utils.Command)
     @commands.is_owner()
@@ -25,6 +25,7 @@ class EmbedMaker(utils.Cog):
         content = None
         embed = {"fields": []}
         show_keys = False
+        await ctx.okay()
 
         # These are our instructions
         INSTRUCTIONS = [
@@ -60,7 +61,10 @@ class EmbedMaker(utils.Cog):
             for e in METHOD_EMOJI.keys():
                 await instruction_message.add_reaction(e)
             check = lambda r, u: r.message.channel == instruction_message.channel and u.id == ctx.author.id
-            reaction, _ = await self.bot.wait_for("reaction_add", check=check)
+            try:
+                reaction, _ = await self.bot.wait_for("reaction_add", check=check, timeout=120)
+            except asyncio.TimeoutError:
+                return await user.send("Timed out. Cancelling embed creation.")
             emoji = str(reaction)
 
             # Find which method to run
@@ -101,7 +105,7 @@ class EmbedMaker(utils.Cog):
         value_message = await self.bot.wait_for("message", check=lambda m: m.channel == user.dm_channel and not m.author.bot)
         await user.send("Do you want to set this field as **inline** (yes/no)?")
         inline_message = await self.bot.wait_for("message", check=lambda m: m.channel == user.dm_channel and not m.author.bot)
-        embed.fields.append({
+        embed['fields'].append({
             "name": name_message.content,
             "value": value_message.content,
             "inline": inline_message.content.lower() == "yes",
@@ -199,14 +203,17 @@ class EmbedMaker(utils.Cog):
         self.last_made_embed[user.id] = {'content': content, 'embed': embed}
 
         # Find the destination
-        await user.send("Where do you want to send this embed?")
+        await user.send("Where do you want to send this embed (or `skip`)?")
         message = await self.bot.wait_for("message", check=lambda m: m.channel == user.dm_channel and not m.author.bot)
+        channel = None
         try:
             channel = await commands.TextChannelConverter().convert(ctx, message.content)
         except commands.CommandError as e:
-            return await user.send(f"Found an error sending that. Sorry about that. Cancelled.")
-        if message.content.lower() != 'skip':
+            if message.content.lower() != 'skip':
+                return await user.send("Alright, skpping.")
             return await user.send("I can't work out where you want to send that. Sorry about that. Cancelled.")
+        if channel is None:
+            return await user.send(f"Found an error sending that. Sorry about that. Cancelled.")
 
         # Send it out
         if embed:
