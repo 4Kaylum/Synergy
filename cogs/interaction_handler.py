@@ -43,7 +43,7 @@ class InteractionHandler(utils.Cog):
         # Get metadata
         command_name, text = ctx.response[0]['command_name'], ctx.response[0]['response']
         async with self.bot.database() as db:
-            metadata = await db("SELECT * FROM command_names WHERE command_name=$1", command_name)
+            metadata = await db("SELECT * FROM command_names WHERE command_name=$1 AND guild_id=$2", command_name, ctx.guild.id)
 
         # Get command enabled
         if metadata[0]['enabled'] is False:
@@ -56,6 +56,7 @@ class InteractionHandler(utils.Cog):
         # Get user amount
         max_mentions = metadata[0]['max_mentions']
         min_mentions = metadata[0]['min_mentions']
+        print(max_mentions, min_mentions, users)
         if len(users) > max_mentions:
             return await ctx.send("You've mentioned too many users for this command.")  # TODO raise custom error
         if len(users) < min_mentions:
@@ -67,6 +68,8 @@ class InteractionHandler(utils.Cog):
 
             if match.group(2):
                 return users[int(match.group(2))].mention
+            if match.group(1) == 'user':
+                return users[0].mention
             return ctx.author.mention
 
         # Output
