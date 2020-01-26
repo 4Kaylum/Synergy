@@ -11,7 +11,7 @@ CREATE TABLE command_names(
     nsfw BOOLEAN DEFAULT FALSE,
     min_mentions INTEGER DEFAULT 1,
     max_mentions INTEGER DEFAULT 1,
-    aliases VARCHAR(500) DEFAULT '',
+    aliases VARCHAR(30)[] DEFAULT '{}',
     PRIMARY KEY (guild_id, command_name)
 );
 

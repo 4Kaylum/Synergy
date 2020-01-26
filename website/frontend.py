@@ -48,7 +48,7 @@ async def guild_picker(request:Request):
 
 
 @routes.get("/guilds/{guild_id}")
-# @template('guild_settings.j2')
+@template('guild_settings.j2')
 @webutils.add_output_args()
 async def guild_settings(request:Request):
     """The guild picker page for the user"""
@@ -91,21 +91,17 @@ async def guild_settings(request:Request):
             'nsfw': row['nsfw'],
             'min_mentions': row['min_mentions'],
             'max_mentions': row['max_mentions'],
-            'aliases': row['aliases'],
+            'aliases': ','.join(row['aliases']),
         }
 
     # Send data back to page
-    return render_template(
-        '_guild_settings.dev.j2' if request.query.get('dev') else 'guild_settings.j2',
-        request,
-        {
-            'session': session,
-            'guild': guild_object,
-            'interactions': interactions,
-            'metadata': metadata,
-            'highlight': request.query.get('highlight'),
-        },
-    )
+    return {
+        'guild': guild_object,
+        'interactions': interactions,
+        'metadata': metadata,
+        'highlight': request.query.get('highlight'),
+    }
+
 
 
 @routes.get("/copy_to_guild")
@@ -178,7 +174,7 @@ async def copy_to_guild_redirect(request:Request):
                 pass
 
     # Redirect
-    return HTTPFound(location=f"/guilds/{guild_id}?highlight={i}")
+    return HTTPFound(location=f"/marketplace")
 
 
 @routes.get("/discord_oauth_login")

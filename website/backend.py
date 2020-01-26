@@ -1,3 +1,6 @@
+import re as regex
+import collections
+
 import aiohttp_session
 import discord
 from aiohttp.web import HTTPFound, Request, RouteTableDef, Response
@@ -56,8 +59,28 @@ async def update_custom_commands(request:Request):
 
     # Get and fix up data
     post_data = await request.post()
-    command_data = set([(guild_id, key, i['enabled'], i['nsfw'], int(i['minMentions']), int(i['maxMentions']), i['aliases']) for key, i in post_data['metadata'].items()])  # [(guild_id, command_name)...]
-    command_responses = set([(guild_id, i.rstrip('[]'), o) for i, o in post_data['responses'].items()])  # [(guild_id, command_name, response)...]
+
+    # Fix metadata
+    working_command_data = collections.defaultdict(dict)
+    for key, value in post_data.items():
+        if not key.startswith('metadata'):
+            continue
+        match = regex.search(r"(.+?)(\[(.*?)\])(\[(.*)\])", key)
+        working_command_data[match.group(3)][match.group(5)] = value
+    command_data = set([(guild_id, key, i['enabled'] == 'true', i['nsfw'] == 'true', int(i['minMentions']), int(i['maxMentions']), tuple(o.strip() for o in i['aliases'].split(','))) for key, i in working_command_data.items()])
+
+    # Fix commands
+    working_response_data = collections.defaultdict(list)
+    for key, value in post_data.items():
+        if not key.startswith('responses'):
+            continue
+        match = regex.search(r"(.+?)(\[(.*?)\])\[\]", key)
+        working_response_data[match.group(3)].append(value)
+    command_responses = []
+    for key, value in working_response_data.items():
+        for line in value:
+            command_responses.append((guild_id, key, line))
+    command_responses = set(command_responses)
 
     # Update database babey wew
     async with request.app['database']() as db:
