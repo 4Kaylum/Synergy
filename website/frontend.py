@@ -79,22 +79,30 @@ async def guild_settings(request:Request):
 
     # Get interaction info
     interactions = collections.defaultdict(list)
+    metadata = {}
     async with request.app['database']() as db:
-        # command_info = await db('SELECT command_name FROM command_names WHERE guild_id=$1', guild_id)
         command_responses = await db('SELECT command_name, response FROM command_responses WHERE guild_id=$1 ORDER BY response ASC', guild_id)
-    # for command in command_info:
-    #     interactions[command['command_name']]
+        command_metadata = await db('SELECT * FROM command_names WHERE guild_id=$1', guild_id)
     for response in command_responses:
         interactions[response['command_name']].append(response['response'])
+    for row in command_metadata:
+        metadata[row['command_name']] = {
+            'enabled': row['enabled'],
+            'nsfw': row['nsfw'],
+            'min_mentions': row['min_mentions'],
+            'max_mentions': row['max_mentions'],
+            'aliases': row['aliases'],
+        }
 
     # Send data back to page
     return render_template(
-        'guild_settings.dev.j2' if request.query.get('dev') else 'guild_settings.j2',
+        '_guild_settings.dev.j2' if request.query.get('dev') else 'guild_settings.j2',
         request,
         {
+            'session': session,
             'guild': guild_object,
             'interactions': interactions,
-            'session': session,
+            'metadata': metadata,
             'highlight': request.query.get('highlight'),
         },
     )

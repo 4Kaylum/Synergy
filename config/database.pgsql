@@ -9,6 +9,9 @@ CREATE TABLE command_names(
     command_name VARCHAR(30),
     enabled BOOLEAN DEFAULT TRUE,
     nsfw BOOLEAN DEFAULT FALSE,
+    min_mentions INTEGER DEFAULT 1,
+    max_mentions INTEGER DEFAULT 1,
+    aliases VARCHAR(500) DEFAULT '',
     PRIMARY KEY (guild_id, command_name)
 );
 

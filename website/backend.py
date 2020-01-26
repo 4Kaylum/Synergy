@@ -1,6 +1,6 @@
 import aiohttp_session
 import discord
-from aiohttp.web import HTTPFound, Request, RouteTableDef
+from aiohttp.web import HTTPFound, Request, RouteTableDef, Response
 
 from website import utils as webutils
 
@@ -56,14 +56,14 @@ async def update_custom_commands(request:Request):
 
     # Get and fix up data
     post_data = await request.post()
-    command_names = set([(guild_id, i.rstrip('[]')) for i in post_data.keys() if i])
-    command_responses = set([(guild_id, i.rstrip('[]'), o) for i, o in post_data.items()])
+    command_data = set([(guild_id, key, i['enabled'], i['nsfw'], int(i['minMentions']), int(i['maxMentions']), i['aliases']) for key, i in post_data['metadata'].items()])  # [(guild_id, command_name)...]
+    command_responses = set([(guild_id, i.rstrip('[]'), o) for i, o in post_data['responses'].items()])  # [(guild_id, command_name, response)...]
 
     # Update database babey wew
     async with request.app['database']() as db:
         await db('DELETE FROM command_names WHERE guild_id=$1', guild_id)
         await db('DELETE FROM command_responses WHERE guild_id=$1', guild_id)
-        await db.conn.copy_records_to_table('command_names', records=command_names, columns=('guild_id', 'command_name'))
+        await db.conn.copy_records_to_table('command_names', records=command_data, columns=('guild_id', 'command_name', 'enabled', 'nsfw', 'min_mentions', 'max_mentions', 'aliases'))
         await db.conn.copy_records_to_table('command_responses', records=command_responses, columns=('guild_id', 'command_name', 'response'))
 
     # Wew nice

@@ -4,7 +4,7 @@ import aiohttp_session
 from aiohttp.web import HTTPFound, Request
 
 
-def add_output_args(*, redirect_if_logged_out:str=None, redirect_if_logged_in:str=None):
+def add_output_args():
     """This function is a wrapper around all routes. It takes the output and
     adds the user info and request to the returning dictionary
     It must be applied before the template decorator"""
@@ -45,22 +45,12 @@ def add_output_args(*, redirect_if_logged_out:str=None, redirect_if_logged_in:st
             if 'request' not in data:
                 data.update({'request': request})
 
-            # Update OpenGraph information
-            if 'opengraph' not in data:
-                data.update({'opengraph': dict()})
-            og_data = data['opengraph'].copy()
-            og_data['og:title'] = og_data.get('og:title', 'MarriageBot - A marriage-based Discord bot')
-            og_data['og:description'] = og_data.get('og:description', 'MarriageBot is a Discord bot used for simulations of your family, be it that you want b1nzy as your mom, or Jake as your nephew, MarriageBot can handle it all.')
-            og_data['og:type'] = og_data.get('og:type', 'website')
-            og_data['og:image'] = og_data.get('og:image', 'https://marriagebot.xyz/static/images/MarriageBotCircle.150.png')
-            og_data['og:locale'] = og_data.get('og:locale', 'en_GB')
-            data['opengraph'] = og_data
-
-            # Check return relevant info
-            if redirect_if_logged_out and session.get('user_id') is None:
-                return HTTPFound(location=redirect_if_logged_out)
-            elif redirect_if_logged_in and session.get('user_id') is not None:
-                return HTTPFound(location=redirect_if_logged_in)
+            # Get bot application image if we need to
+            if not request.app.get('logo_url'):
+                appinfo = await request.app['bot'].application_info()
+                logo_url = str(appinfo.icon_url)
+                request.app['logo_url'] = logo_url
+            data.update({'logo_url': request.app['logo_url']})
 
             return data
         return wrapper
