@@ -65,7 +65,7 @@ class InteractionHandler(utils.Cog):
         async with self.bot.database() as db:
             response = await db("SELECT response FROM command_responses WHERE command_name=$1 AND guild_id=$2 AND user_mention_count=$3 ORDER BY RANDOM() LIMIT 1", command_name, ctx.guild.id, len(users))
         if not response:
-            return await ctx.send(f"There are no responses with {len(users)} user arguments listed.")
+            return await ctx.send(f"There are no responses with {len(users)} user arguments set on the website.")
 
         # Build command response
         def argument_replacer(match):
