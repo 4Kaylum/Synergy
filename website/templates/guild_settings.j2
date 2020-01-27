@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="container mt-3">
+<div id="content-container" class="container mt-3">
 
     <div class="row">
         <div class="col">
@@ -19,71 +19,62 @@
         </div> <!-- col -->
     </div> <!-- row -->
 
-    <div class="row" id="guild-settings-accordion-holder">
+    <div class="row">
+        <button class="btn btn-secondary w-100 mb-3 mt-3" type="button" onclick="addNewCommand();">Add new command</button>
+    </div>
 
-        <button class="btn btn-secondary w-100 mb-3 mt-3" type="button" onclick="addNewCommand();">
-            Add new command
-        </button>
-
-        <div class="card-columns" id="guild-settings-accordion">
-            {% for name, responses in interactions.items() %}
-                <form class="card interaction-form" data-interaction-name="{{ name }}">
-
-                    <div class="card-header" id="interaction-command-{{ name }}">
-                        {{ name }} command
-                    </div> <!-- card-header -->
-
-                    <div class="card-body">
-
-                        <div class="command-metadata pl-3 pr-3 mb-4">
-
-                            <div class="form-group">
-                                <label for="commandAliases">Command Aliases</label>
-                                <input type="text" id="commandAliases" data-input-type="command-aliases" class="form-control" placeholder="your, aliases, here" value="" />
-                            </div>
-
-                            <div class="form-group">
-                                <div class="form-check">
-                                    <input class="form-check-input" data-input-type="enabled" type="checkbox"{% if metadata[name].enabled %} checked{% endif %} name="enabled" />
-                                    <label class="form-check-label">Command enabled</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" data-input-type="nsfw" type="checkbox"{% if metadata[name].nsfw %} checked{% endif %} name="nsfw" />
-                                    <label class="form-check-label">Command is NSFW</label>
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="minimumUserMentions">Minimum User Mentions</label>
-                                <input type="number" id="minimumUserMentions" data-input-type="min-mentions" class="form-control" placeholder="Minimum Mentions" value="{{ metadata[name]['min_mentions'] }}" min="0" max="4" required />
-                                <label for="maximumUserMentions">Maximum User Mentions</label>
-                                <input type="number" id="maximumUserMentions" data-input-type="max-mentions" class="form-control" placeholder="Maximum Mentions" value="{{ metadata[name]['max_mentions'] }}" min="0" max="4" required />
-                            </div>
-
+    {% for name, responses in interactions.items() %}
+        <div class="card p-4 interaction-form" data-interaction-name="{{ name }}">
+            <div class="row">
+                <div class="col-12 mb-3">
+                    <h1 class="text-center mb-4">{{ name }} command</h1>
+                    <div class="input-group">
+                        <button class="btn btn-secondary w-100" type="button" onclick="$(this.parentNode.parentNode.parentNode.parentNode).remove();">Delete command</button>
+                    </div>
+                </div> <!-- col -->
+                <div class="col-md-4 col-sm-12">
+                    <div class="command-metadata">
+                        <div class="form-group">
+                            <label for="commandAliases">Command Aliases</label>
+                            <input type="text" id="commandAliases" data-input-type="command-aliases" class="form-control" placeholder="your, aliases, here" value="" />
                         </div>
-
-                        <div class="input-group">
-                            <button class="btn btn-primary w-50" type="button" onclick="addNewResponse(this.parentNode.parentNode);">Add new response</button>
-                            <button class="btn btn-secondary w-50" type="button" onclick="$(this.parentNode.parentNode.parentNode).remove();">Delete command</button>
-                        </div>
-                        {% for text in responses %}
-                            <div class="input-group mt-1">
-                                <input type="text" data-input-type="response" class="form-control" placeholder="A response for an interaction" value="{{ text }}" required />
-                                <div class="input-group-append">
-                                    <button class="btn btn-danger" type="button" onclick="$(this.parentNode.parentNode).remove()">-</button>
-                                </div>
+                        <div class="form-group">
+                            <div class="form-check">
+                                <input class="form-check-input" data-input-type="enabled" type="checkbox"{% if metadata[name].enabled %} checked{% endif %} name="enabled" />
+                                <label class="form-check-label">Command enabled</label>
                             </div>
-                        {% endfor %}
-                    </div> <!-- card-body -->
+                            <div class="form-check">
+                                <input class="form-check-input" data-input-type="nsfw" type="checkbox"{% if metadata[name].nsfw %} checked{% endif %} name="nsfw" />
+                                <label class="form-check-label">Command is NSFW</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="minimumUserMentions">Minimum User Mentions</label>
+                            <input type="number" id="minimumUserMentions" data-input-type="min-mentions" class="form-control" placeholder="Minimum Mentions" value="{{ metadata[name]['min_mentions'] }}" min="0" max="4" required />
+                            <label for="maximumUserMentions">Maximum User Mentions</label>
+                            <input type="number" id="maximumUserMentions" data-input-type="max-mentions" class="form-control" placeholder="Maximum Mentions" value="{{ metadata[name]['max_mentions'] }}" min="0" max="4" required />
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-8 col-sm-12">
+                    <div class="input-group">
+                        <button class="btn btn-primary w-100" type="button" onclick="addNewResponse(this.parentNode.parentNode);">Add new response</button>
+                    </div>
+                    {% for text in responses %}
+                        <div class="input-group mt-1">
+                            <input type="text" data-input-type="response" class="form-control" placeholder="A response for an interaction" value="{{ text }}" required />
+                            <div class="input-group-append">
+                                <button class="btn btn-danger" type="button" onclick="$(this.parentNode.parentNode).remove()">-</button>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div> <!-- col -->
+            </div>
+        </div> <!-- row -->
+    {% endfor %}
 
-                </form> <!-- card -->
-            {% endfor %}
-        </div> <!-- accordion -->
-
-        <button class="btn btn-primary w-100 mb-3 mt-3" type="button" onclick="submitCommandChanges();">
-            Submit Command Changes
-        </button>
-
+    <div class="row">
+        <button class="btn btn-primary w-100 mb-3 mt-3" type="button" onclick="submitCommandChanges();">Submit Command Changes</button>
     </div> <!-- row -->
 
 </div>

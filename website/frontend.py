@@ -103,7 +103,6 @@ async def guild_settings(request:Request):
     }
 
 
-
 @routes.get("/copy_to_guild")
 @template('copy_to_guild.j2')
 @webutils.add_output_args()
