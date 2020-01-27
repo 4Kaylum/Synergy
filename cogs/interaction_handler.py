@@ -21,7 +21,7 @@ class InteractionHandler(utils.Cog):
         # Check responses
         command_name = ctx.invoked_with.lower()
         async with self.bot.database() as db:
-            metadata = await db("SELECT command_name FROM command_names WHERE (command_name=$1 OR $1=ANY(aliases)) AND command_responses.guild_id=$2 ORDER BY RANDOM() LIMIT 1", command_name, ctx.guild.id)
+            metadata = await db("SELECT * FROM command_names WHERE (command_name=$1 OR $1=ANY(aliases)) AND guild_id=$2 ORDER BY RANDOM() LIMIT 1", command_name, ctx.guild.id)
         if not metadata:
             return
 
@@ -42,10 +42,8 @@ class InteractionHandler(utils.Cog):
         """Handles pinging out the responses for a given interaction. Users cannot call this."""
 
         # Get metadata
-        metadata = ctx.response[0]
-        command_name, text = ctx.response[0]['command_name'], ctx.response[0]['response']
-        async with self.bot.database() as db:
-            metadata = await db("SELECT * FROM command_names WHERE command_name=$1 AND guild_id=$2", command_name, ctx.guild.id)
+        metadata = ctx.response_metadata[0]
+        command_name = metadata['command_name']
 
         # Get command enabled
         if metadata['enabled'] is False:
@@ -55,13 +53,19 @@ class InteractionHandler(utils.Cog):
         if metadata['nsfw'] and ctx.channel.is_nsfw is False:
             raise commands.NSFWChannelRequired()
 
-        # Get user amount
+        # Check mention count
         max_mentions = metadata['max_mentions']
         min_mentions = metadata['min_mentions']
         if len(users) > max_mentions:
             return await ctx.send("You've mentioned too many users for this command.")  # TODO raise custom error
         if len(users) < min_mentions:
             return await ctx.send("You've not mentioned enough users for this command.")  # TODO raise custom error
+
+        # Get valid responses
+        async with self.bot.database() as db:
+            response = await db("SELECT response FROM command_responses WHERE command_name=$1 AND guild_id=$2 AND user_mention_count=$3 ORDER BY RANDOM() LIMIT 1", command_name, ctx.guild.id, len(users))
+        if not response:
+            return await ctx.send(f"There are no responses with {len(users)} user arguments listed.")
 
         # Build command response
         def argument_replacer(match):
@@ -74,6 +78,7 @@ class InteractionHandler(utils.Cog):
             return ctx.author.mention
 
         # Output
+        text = response[0]['response']
         await ctx.send(self.ARGUMENT_REPLACEMENT_REGEX.sub(argument_replacer, text))
 
     @commands.command(cls=utils.Command)
