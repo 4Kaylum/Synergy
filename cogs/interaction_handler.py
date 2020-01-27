@@ -48,7 +48,7 @@ class InteractionHandler(utils.Cog):
 
         # Get command enabled
         if metadata[0]['enabled'] is False:
-            raise commands.DisabledCommand()
+            raise utils.errors.DisabledCustomCommand()
 
         # Get command nsfw
         if metadata[0]['nsfw'] and ctx.channel.is_nsfw is False:
