@@ -21,14 +21,14 @@ class InteractionHandler(utils.Cog):
         # Check responses
         command_name = ctx.invoked_with.lower()
         async with self.bot.database() as db:
-            response = await db("SELECT command_names.command_name, command_responses.response FROM command_responses, command_names WHERE command_responses.guild_id=command_names.guild_id AND (command_responses.command_name=$1 OR $1=ANY(command_names.aliases)) AND command_responses.guild_id=$2 ORDER BY RANDOM() LIMIT 1", command_name, ctx.guild.id)
-        if not response:
+            metadata = await db("SELECT command_name FROM command_names WHERE (command_name=$1 OR $1=ANY(aliases)) AND command_responses.guild_id=$2 ORDER BY RANDOM() LIMIT 1", command_name, ctx.guild.id)
+        if not metadata:
             return
 
         # Invoke command
         metacommand: utils.Command = self.bot.get_command('interaction_response_metacommand')
         ctx.command = metacommand
-        ctx.response = response
+        ctx.response_metadata = metadata
         ctx.invoke_meta = True
         try:
             await ctx.command.invoke(ctx)  # This converts the args for me, which is nice
@@ -42,22 +42,22 @@ class InteractionHandler(utils.Cog):
         """Handles pinging out the responses for a given interaction. Users cannot call this."""
 
         # Get metadata
+        metadata = ctx.response[0]
         command_name, text = ctx.response[0]['command_name'], ctx.response[0]['response']
         async with self.bot.database() as db:
             metadata = await db("SELECT * FROM command_names WHERE command_name=$1 AND guild_id=$2", command_name, ctx.guild.id)
 
         # Get command enabled
-        if metadata[0]['enabled'] is False:
+        if metadata['enabled'] is False:
             raise utils.errors.DisabledCustomCommand()
 
         # Get command nsfw
-        if metadata[0]['nsfw'] and ctx.channel.is_nsfw is False:
+        if metadata['nsfw'] and ctx.channel.is_nsfw is False:
             raise commands.NSFWChannelRequired()
 
         # Get user amount
-        max_mentions = metadata[0]['max_mentions']
-        min_mentions = metadata[0]['min_mentions']
-        print(max_mentions, min_mentions, users)
+        max_mentions = metadata['max_mentions']
+        min_mentions = metadata['min_mentions']
         if len(users) > max_mentions:
             return await ctx.send("You've mentioned too many users for this command.")  # TODO raise custom error
         if len(users) < min_mentions:
@@ -68,7 +68,7 @@ class InteractionHandler(utils.Cog):
             """Replaces the argument of the group with a user mention"""
 
             if match.group(2):
-                return users[int(match.group(2))].mention
+                return users[int(match.group(2)) - 1].mention
             if match.group(1) == 'user':
                 return users[0].mention
             return ctx.author.mention

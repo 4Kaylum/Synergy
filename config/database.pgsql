@@ -20,5 +20,6 @@ CREATE TABLE command_responses(
     guild_id BIGINT,
     command_name VARCHAR(30),
     response VARCHAR(2000),
+    user_mention_count INTEGER DEFAULT 0,
     PRIMARY KEY (guild_id, command_name, response)
 );

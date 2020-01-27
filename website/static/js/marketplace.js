@@ -8,7 +8,7 @@ function populateCommandDeck() {
                         <p>Command Name: <b>${element.command_name}</b></p>
                     </div>
                     <div class="card-body">
-                        <p>${element.response.replace(/%author/, '<code>%author</code>').replace(/%user(\d+)?/, '<code>%user$1</code>')}</p>
+                        <p>${element.response.replace(/%author/g, '<code>%author</code>').replace(/%user(\d+)?/g, '<code>%user$1</code>')}</p>
                         <form action="/copy_to_guild">
                             <input type="hidden" name="command" value="${element.command_name}" />
                             <input type="hidden" name="response" value="${element.response}" />

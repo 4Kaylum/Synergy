@@ -21,7 +21,7 @@ function addNewCommand() {
         <div class="card p-4 interaction-form" data-interaction-name="${commandName}">
             <div class="row">
                 <div class="col-12 mb-3">
-                    <h1 class="text-center mb-4">${commandName} command</h1>
+                    <h3 class="text-center mb-4">${commandName} command</h3>
                     <div class="input-group">
                         <button class="btn btn-secondary w-100" type="button" onclick="$(this.parentNode.parentNode.parentNode.parentNode).remove();">Delete command</button>
                     </div>
@@ -30,23 +30,23 @@ function addNewCommand() {
                     <div class="command-metadata">
                         <div class="form-group">
                             <label for="commandAliases">Command Aliases</label>
-                            <input type="text" id="commandAliases" data-input-type="command-aliases" class="form-control" placeholder="your, aliases, here" value="" />
+                            <input type="text" id="commandAliases" data-input-type="command-aliases" class="form-control" placeholder="your, aliases, here" value="" autocomplete="off" />
                         </div>
                         <div class="form-group">
                             <div class="form-check">
-                                <input class="form-check-input" data-input-type="enabled" type="checkbox" checked name="enabled" />
+                                <input class="form-check-input" data-input-type="enabled" type="checkbox" checked name="enabled" autocomplete="off" />
                                 <label class="form-check-label">Command enabled</label>
                             </div>
                             <div class="form-check">
-                                <input class="form-check-input" data-input-type="nsfw" type="checkbox" name="nsfw" />
+                                <input class="form-check-input" data-input-type="nsfw" type="checkbox" name="nsfw" autocomplete="off" />
                                 <label class="form-check-label">Command is NSFW</label>
                             </div>
                         </div>
                         <div class="form-group">
                             <label for="minimumUserMentions">Minimum User Mentions</label>
-                            <input type="number" id="minimumUserMentions" data-input-type="min-mentions" class="form-control" placeholder="Minimum Mentions" value="1" min="0" max="4" required />
+                            <input type="number" id="minimumUserMentions" data-input-type="min-mentions" class="form-control" placeholder="Minimum Mentions" value="1" min="0" max="4" autocomplete="off" required />
                             <label for="maximumUserMentions">Maximum User Mentions</label>
-                            <input type="number" id="maximumUserMentions" data-input-type="max-mentions" class="form-control" placeholder="Maximum Mentions" value="1" min="0" max="4" required />
+                            <input type="number" id="maximumUserMentions" data-input-type="max-mentions" class="form-control" placeholder="Maximum Mentions" value="1" min="0" max="4" autocomplete="off" required />
                         </div>
                     </div>
                 </div>
@@ -55,7 +55,7 @@ function addNewCommand() {
                         <button class="btn btn-primary w-100" type="button" onclick="addNewResponse(this.parentNode.parentNode);">Add new response</button>
                     </div>
                         <div class="input-group mt-1">
-                            <input type="text" data-input-type="response" class="form-control" placeholder="A response for an interaction" value="" required />
+                            <input type="text" data-input-type="response" class="form-control" placeholder="A response for an interaction" value="" autocomplete="off" required />
                             <div class="input-group-append">
                                 <button class="btn btn-danger" type="button" onclick="$(this.parentNode.parentNode).remove()">-</button>
                             </div>

@@ -49,8 +49,7 @@ def add_output_args():
             # Get bot application image if we need to
             if not request.app.get('logo_url'):
                 appinfo = await request.app['bot'].application_info()
-                logo_url = str(appinfo.icon_url)
-                request.app['logo_url'] = logo_url
+                request.app['logo_url'] = f"{appinfo.icon_url!s}?size=1024"
             data.update({'logo_url': request.app['logo_url']})
 
             return data
