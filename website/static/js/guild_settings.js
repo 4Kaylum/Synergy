@@ -102,10 +102,14 @@ function submitCommandChanges() {
         responses: commandList,
         metadata: commandData,
     }
-    $.post(`${window.location.pathname}/update_custom_commands`, data)
-        .done(function(data) {
-            console.log(data);
-            alert("Submitted.");
-            location.reload();
-        });
+    $.ajax({
+        url: `${window.location.pathname}/update_custom_commands`,
+        method: 'post',
+        contentType: 'application/json',
+        data: JSON.stringify(data)
+    }).done(function(data) {
+        console.log(data);
+        alert("Submitted.");
+        location.reload();
+    });
 }

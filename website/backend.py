@@ -50,28 +50,15 @@ async def update_custom_commands(request:Request):
             return Response(text="Failure", status=401)
 
     # Get and fix up data
-    post_data = await request.post()
+    post_data = await request.json()
+    print(post_data)
 
     # Fix metadata
-    working_command_data = collections.defaultdict(dict)
-    for key, value in post_data.items():
-        if not key.startswith('metadata'):
-            continue
-        match = regex.search(r"(.+?)(\[(.*?)\])(\[(.*)\])", key)
-        working_command_data[match.group(3)][match.group(5)] = value
-    command_data = set([(guild_id, key, i['enabled'] == 'true', i['nsfw'] == 'true', int(i['minMentions']), int(i['maxMentions']), tuple(o.strip() for o in i['aliases'].split(','))) for key, i in working_command_data.items()])
-
-    # Fix commands
-    working_response_data = collections.defaultdict(list)
-    for key, value in post_data.items():
-        if not key.startswith('responses'):
-            continue
-        match = regex.search(r"(.+?)(\[(.*?)\])\[\]", key)
-        working_response_data[match.group(3)].append(value)
+    command_data = set([(guild_id, key, i['enabled'] == 'true', i['nsfw'] == 'true', int(i['minMentions'] or '1'), int(i['maxMentions'] or '1'), tuple(o.strip() for o in i['aliases'].split(','))) for key, i in post_data['metadata'].items()])
     command_responses = []
-    for key, value in working_response_data.items():
-        for line in value:
-            command_responses.append((guild_id, key, line))
+    for key, response_list in post_data['responses'].items():
+        for text in response_list:
+            command_responses.append((guild_id, key, text))
     command_responses = set(command_responses)
 
     # Update database babey wew
