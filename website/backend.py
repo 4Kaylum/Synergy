@@ -15,7 +15,8 @@ async def login(request:Request):
     """Page the discord login redirects the user to when successfully logged in with Discord"""
 
     await webutils.process_discord_login(request, ['identify', 'guilds'])
-    return HTTPFound(location=f'/')
+    session = await aiohttp_session.get_session(request)
+    return HTTPFound(location=session.pop('redirect_on_login', '/'))
 
 
 @routes.get('/login_redirect/guilds')
@@ -24,15 +25,6 @@ async def guild_login(request:Request):
 
     guild_id = request.query.get('guild_id')
     return HTTPFound(location=f'/guilds/{guild_id}')
-
-
-@routes.get('/logout')
-async def logout(request:Request):
-    """Clears your session cookies"""
-
-    session = await aiohttp_session.get_session(request)
-    session.invalidate()
-    return HTTPFound(location=f'/')
 
 
 @routes.post('/guilds/{guild_id}/update_custom_commands')

@@ -65,7 +65,7 @@ class CustomBot(commands.AutoShardedBot):
         # Here's the storage for cached stuff
         self.guild_settings = collections.defaultdict(self.DEFAULT_GUILD_SETTINGS.copy)
 
-    def get_invite_link(self, *, join_server_redirect_uri:str=None, guild_id:int=None, **kwargs):
+    def get_invite_link(self, *, scope:str='bot', response_type:str=None, redirect_uri:str=None, guild_id:int=None, **kwargs):
         """Gets the invite link for the bot, with permissions all set properly"""
 
         permissions = discord.Permissions()
@@ -73,13 +73,15 @@ class CustomBot(commands.AutoShardedBot):
             setattr(permissions, name, value)
         data = {
             'client_id': self.config.get('oauth', {}).get('client_id', None) or self.user.id,
-            'scope': 'bot',
+            'scope': scope,
             'permissions': permissions.value
         }
-        if join_server_redirect_uri:
-            data['redirect_uri'] = join_server_redirect_uri
+        if redirect_uri:
+            data['redirect_uri'] = redirect_uri
         if guild_id:
             data['guild_id'] = guild_id
+        if response_type:
+            data['response_type'] = response_type
         return 'https://discordapp.com/oauth2/authorize?' + urlencode(data)
 
     async def add_delete_button(self, message:discord.Message, valid_users:typing.List[discord.User], *, delete:typing.List[discord.Message]=None, timeout=60.0):
@@ -115,7 +117,7 @@ class CustomBot(commands.AutoShardedBot):
         bulk = False
         if message.guild:
             permissions: discord.Permissions = message.channel.permissions_for(message.guild.me)
-            bulk = permissions.manage_message and permissions.read_message_history
+            bulk = permissions.manage_messages and permissions.read_message_history
         try:
             await message.channel.purge(check=lambda m: m.id in [i.id for i in delete], bulk=bulk)
         except Exception:
@@ -193,7 +195,7 @@ class CustomBot(commands.AutoShardedBot):
             try:
                 self.unload_extension(i)
             except Exception as e:
-                self.logger.warning(f' * {i}... failed - {e!s}')
+                self.logger.debug(f' * {i}... failed - {e!s}')
             else:
                 self.logger.info(f' * {i}... success')
 
@@ -208,14 +210,18 @@ class CustomBot(commands.AutoShardedBot):
             else:
                 self.logger.info(f' * {i}... success')
 
-    async def set_default_presence(self):
+    async def set_default_presence(self, shard_id:int=None):
         """Sets the default presence for the bot as appears in the config file"""
 
         # Update presence
         self.logger.info("Setting default bot presence")
         presence = self.config['presence']
         if self.shard_count > 1:
-            for i in range(self.shard_count):
+            if shard_id:
+                min, max = shard_id, shard_id + 1
+            else:
+                min, max = self.shard_ids[0], self.shard_ids[-1]
+            for i in range(min, max):
                 activity = discord.Activity(
                     name=f"{presence['text']} (shard {i})",
                     type=getattr(discord.ActivityType, presence['activity_type'].lower())

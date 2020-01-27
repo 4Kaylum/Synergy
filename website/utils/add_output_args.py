@@ -23,7 +23,8 @@ def add_output_args():
             if isinstance(data, HTTPFound):
                 if data.location == "/discord_oauth_login":
                     session = await aiohttp_session.get_session(request)
-                    session['redirect_on_login'] = str(request.url)
+                    if 'redirect_on_login' not in session:
+                        session['redirect_on_login'] = str(request.url)
             if not isinstance(data, dict):
                 return data
 
