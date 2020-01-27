@@ -176,6 +176,7 @@ class CustomBot(commands.AutoShardedBot):
             ctx.original_author = ctx.guild.get_member(message.author.id)
         else:
             ctx.original_author = self.get_user(message.author.id)
+        ctx.invoke_meta = False
         return ctx
 
     def get_extensions(self) -> list:

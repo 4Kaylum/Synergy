@@ -29,8 +29,9 @@ class InteractionHandler(utils.Cog):
         metacommand: utils.Command = self.bot.get_command('interaction_response_metacommand')
         ctx.command = metacommand
         ctx.response = response
+        ctx.invoke_meta = True
         try:
-            await ctx.command.invoke_ignoring_meta(ctx)  # This converts the args for me, which is nice
+            await ctx.command.invoke(ctx)  # This converts the args for me, which is nice
         except commands.CommandError as e:
             self.bot.dispatch("command_error", ctx, e)
 

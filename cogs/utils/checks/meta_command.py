@@ -11,5 +11,7 @@ def meta_command():
     Should be caught and then reinvoked"""
 
     def predicate(ctx):
+        if getattr(ctx, 'invoke_meta', False):
+            return True
         raise InvokedMetaCommand()
     return commands.check(predicate)
