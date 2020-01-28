@@ -43,7 +43,7 @@
                     <div class="command-metadata">
                         <div class="form-group">
                             <label for="commandAliases">Command Aliases</label>
-                            <input type="text" id="commandAliases" data-input-type="command-aliases" class="form-control" placeholder="your, aliases, here" value="" autocomplete="off" />
+                            <input type="text" id="commandAliases" data-input-type="command-aliases" class="form-control" placeholder="your, aliases, here" value="{{ metadata[name].aliases.replace(',', ', ') }}" autocomplete="off" />
                         </div>
                         <div class="form-group">
                             <div class="form-check">

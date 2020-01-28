@@ -70,11 +70,13 @@ async def update_custom_commands(request:Request):
     post_data = await request.json()
 
     # Fix metadata
-    command_data = set([(guild_id, key, i['enabled'], i['nsfw'], int(i['minMentions'] or '1'), int(i['maxMentions'] or '1'), tuple(o.strip() for o in i['aliases'].split(','))) for key, i in post_data['metadata'].items()])
+    command_data = set([(guild_id, key, i['enabled'], i['nsfw'], int(i['minMentions'] or '1'), int(i['maxMentions'] or '1'), tuple(o.strip() for o in i['aliases'].split(',') if o.strip())) for key, i in post_data['metadata'].items()])
     command_responses = []
     for key, response_list in post_data['responses'].items():
         for text in response_list:
-            text, mention_count = user_argument_fixer(text)
+            if not text.strip():
+                continue
+            text, mention_count = user_argument_fixer(text.strip())
             command_responses.append((guild_id, key, text, mention_count))
     command_responses = set(command_responses)
 
