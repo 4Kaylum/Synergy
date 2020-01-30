@@ -44,7 +44,7 @@ async def guild_login(request:Request):
     return HTTPFound(location=f'/guilds/{guild_id}')
 
 
-@routes.post('/guilds/{guild_id}/update_custom_commands')
+@routes.post('/guilds/responses/{guild_id}')
 async def update_custom_commands(request:Request):
     """Copy the given data into the database as necessary"""
 

@@ -117,7 +117,7 @@ function submitCommandChanges() {
         metadata: commandData,
     }
     $.ajax({
-        url: `${window.location.pathname}/update_custom_commands`,
+        url: window.location.pathname,
         method: 'post',
         contentType: 'application/json',
         data: JSON.stringify(data)
