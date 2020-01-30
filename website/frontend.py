@@ -51,6 +51,41 @@ async def guild_picker(request:Request):
 @template('guild_settings.j2')
 @webutils.add_output_args()
 async def guild_settings(request:Request):
+    """General guild settings page"""
+
+    # Validate guild ID
+    try:
+        guild_id = int(request.match_info['guild_id'])
+    except ValueError:
+        return HTTPFound(location='/guilds')
+
+    # Check session age
+    session = await aiohttp_session.get_session(request)
+    if session.new:
+        return HTTPFound(location='/discord_oauth_login')
+
+    # Check user permissions
+    if session['user_id'] not in request.app['config']['owners']:
+        user_guilds = await webutils.get_user_guilds(request)
+        guild_info = [i for i in user_guilds if guild_id == i['id'] and discord.Permissions(i['permissions']).manage_messages],
+        if not guild_info:
+            return HTTPFound(location='/guilds')
+
+    # Get guild object for in case I force my way in here
+    try:
+        guild_object = await request.app['bot'].fetch_guild(guild_id)
+    except discord.Forbidden:
+        return HTTPFound(location=request.app['bot'].get_invite_link(guild_id=guild_id, redirect_uri="https://synergy.callumb.co.uk/login_redirect/guilds", read_messages=True))
+
+    return {
+        'guild': guild_object
+    }
+
+
+@routes.get("/guilds/responses/{guild_id}")
+@template('guild_responses.j2')
+@webutils.add_output_args()
+async def guild_responses(request:Request):
     """The guild picker page for the user"""
 
     # Validate guild ID
