@@ -75,7 +75,7 @@ async def guild_settings(request:Request):
     try:
         guild_object = await request.app['bot'].fetch_guild(guild_id)
     except discord.Forbidden:
-        return HTTPFound(location=request.app['bot'].get_invite_link(guild_id=guild_id, redirect_uri="https://synergy.callumb.co.uk/login_redirect/guilds", read_messages=True))
+        return HTTPFound(location=request.app['bot'].get_invite_link(guild_id=guild_id, redirect_uri="https://synergy.voxelfox.co.uk/login_redirect/guilds", read_messages=True))
 
     return {
         'guild': guild_object
@@ -110,7 +110,7 @@ async def guild_responses(request:Request):
     try:
         guild_object = await request.app['bot'].fetch_guild(guild_id)
     except discord.Forbidden:
-        return HTTPFound(location=request.app['bot'].get_invite_link(guild_id=guild_id, redirect_uri="https://synergy.callumb.co.uk/login_redirect/guilds", read_messages=True))
+        return HTTPFound(location=request.app['bot'].get_invite_link(guild_id=guild_id, redirect_uri="https://synergy.voxelfox.co.uk/login_redirect/guilds", read_messages=True))
 
     # Get interaction info
     interactions = collections.defaultdict(list)
@@ -217,7 +217,7 @@ async def login(request:Request):
 
     login_url = webutils.get_discord_login_url(
         request,
-        redirect_uri="https://synergy.callumb.co.uk/login_redirect",
+        redirect_uri="https://synergy.voxelfox.co.uk/login_redirect",
         oauth_scopes=['identify', 'guilds'],
     )
     return HTTPFound(location=login_url)
